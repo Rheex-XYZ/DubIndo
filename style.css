@@ -1,0 +1,733 @@
+:root {
+  --primary-color: #e50914;
+  --secondary-color: #141414;
+  --accent-color: #f5f5f5;
+  --background-color: #000000;
+  --text-color: #ffffff;
+  --card-background: #181818;
+  --border-color: #333333;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --header-height: 70px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Add smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Header */
+.header {
+  background-color: var(--secondary-color);
+  padding: 15px 0;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  backdrop-filter: blur(10px);
+  background-color: rgba(20, 20, 20, 0.9);
+}
+
+.header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.logo h1 {
+  color: var(--primary-color);
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Main Content */
+.main-content {
+  padding: 40px 0;
+  min-height: calc(100vh - var(--header-height) - 100px);
+}
+
+/* Welcome Section */
+.welcome-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height) - 100px);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color) 0%,
+    var(--card-background) 100%
+  );
+  border-radius: 20px;
+  margin: 20px 0;
+  box-shadow: var(--shadow);
+}
+
+.welcome-content {
+  text-align: center;
+  max-width: 700px;
+  padding: 40px 20px;
+}
+
+.welcome-content h2 {
+  font-size: 36px;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-content p {
+  font-size: 18px;
+  margin-bottom: 40px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.search-container {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  border: 2px solid var(--primary-color);
+  border-radius: 50px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background-color: var(--card-background);
+}
+
+.search-container input {
+  flex: 1;
+  padding: 18px 25px;
+  border: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 16px;
+  outline: none;
+}
+
+.search-container input::placeholder {
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.search-container button {
+  background-color: var(--primary-color);
+  border: none;
+  padding: 0 25px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 18px;
+}
+
+.search-container button:hover {
+  background-color: #c40812;
+}
+
+/* Movie List Section */
+.movie-list-section {
+  padding: 20px 0;
+  scroll-margin-top: 100px;
+}
+
+.movie-list-container {
+  background-color: var(--card-background);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.movie-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.movie-list-header h2 {
+  color: var(--primary-color);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.new-search-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s, transform 0.2s;
+  font-weight: 600;
+}
+
+.new-search-btn:hover {
+  background-color: #c40812;
+  transform: translateY(-2px);
+}
+
+.movie-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.movie-item {
+  background-color: var(--secondary-color);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.movie-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.3);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.movie-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.movie-item:hover .movie-poster img {
+  transform: scale(1.05);
+}
+
+.movie-info {
+  padding: 15px;
+}
+
+.movie-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.page-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s, transform 0.2s;
+  font-weight: 600;
+}
+
+.page-btn:hover:not([data-disabled="true"]) {
+  background-color: #c40812;
+  transform: translateY(-2px);
+}
+
+.page-btn[data-disabled="true"] {
+  background-color: var(--border-color);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* Movie Detail Section */
+.movie-detail-section {
+  padding: 20px 0;
+}
+
+.back-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s, transform 0.2s;
+  font-weight: 600;
+}
+
+.back-button:hover {
+  background-color: #c40812;
+  transform: translateY(-2px);
+}
+
+.movie-detail {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.movie-detail .movie-poster {
+  flex: 1;
+  min-width: 300px;
+  max-width: 600px;
+  height: 340px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.movie-detail .movie-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.movie-detail .movie-info h2 {
+  margin-bottom: 30px;
+  color: var(--primary-color);
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.video-qualities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.quality-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.quality-btn:hover {
+  background-color: #c40812;
+  transform: translateY(-2px);
+}
+
+/* Video Player Section */
+.video-player-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.video-controls-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 1001;
+}
+
+.close-player-btn,
+.fullscreen-btn {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.close-player-btn:hover,
+.fullscreen-btn:hover {
+  background-color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.close-player-btn:focus,
+.fullscreen-btn:focus {
+  outline: none;
+  background-color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.video-container {
+  width: 90%;
+  max-width: 1000px;
+  aspect-ratio: 16/9;
+  position: relative;
+}
+
+#videoPlayer {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* Footer */
+.footer {
+  background-color: var(--secondary-color);
+  padding: 30px 0;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Loading Indicator */
+.loading-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  display: none;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Spatial Navigation and Focus State for TV Remote */
+.focusable {
+  position: relative;
+  outline: none;
+}
+
+.focusable:focus {
+  outline: none;
+}
+
+.focusable::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 3px solid #e50914;
+  border-radius: 12px;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+}
+
+.focusable:focus::before {
+  opacity: 1;
+  transform: scale(1);
+  animation: focusPulse 1.5s infinite;
+}
+
+@keyframes focusPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(229, 9, 20, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+  }
+}
+
+/* Enhanced Focus State for Movie Items */
+.movie-item.focusable {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.movie-item.focusable:focus {
+  transform: translateY(-15px) scale(1.05);
+  box-shadow: 0 20px 50px rgba(229, 9, 20, 0.5);
+  z-index: 20;
+}
+
+.movie-item.focusable:focus::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border: 4px solid #e50914;
+  border-radius: 18px;
+  opacity: 1;
+  transform: scale(1);
+  animation: movieFocusPulse 2s infinite;
+  box-shadow: 0 0 30px rgba(229, 9, 20, 0.8), 0 0 60px rgba(229, 9, 20, 0.4),
+    inset 0 0 20px rgba(229, 9, 20, 0.2);
+  z-index: 25;
+  pointer-events: none;
+}
+
+@keyframes movieFocusPulse {
+  0% {
+    box-shadow: 0 0 30px rgba(229, 9, 20, 0.8), 0 0 60px rgba(229, 9, 20, 0.4),
+      inset 0 0 20px rgba(229, 9, 20, 0.2);
+    border-color: #e50914;
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(229, 9, 20, 1), 0 0 80px rgba(229, 9, 20, 0.6),
+      inset 0 0 30px rgba(229, 9, 20, 0.4);
+    border-color: #ff6b6b;
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(229, 9, 20, 0.8), 0 0 60px rgba(229, 9, 20, 0.4),
+      inset 0 0 20px rgba(229, 9, 20, 0.2);
+    border-color: #e50914;
+  }
+}
+
+/* Movie selection indicator */
+.movie-item.focusable::after {
+  content: "✓";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background-color: #e50914;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
+  z-index: 30;
+}
+
+.movie-item.focusable:focus::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Enhanced focus for other elements */
+button.focusable:focus,
+input.focusable:focus,
+.quality-btn.focusable:focus,
+.page-btn.focusable:focus,
+.fullscreen-btn.focusable:focus {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
+  z-index: 20;
+}
+
+button.focusable:focus::before,
+input.focusable:focus::before,
+.quality-btn.focusable:focus::before,
+.page-btn.focusable:focus::before,
+.fullscreen-btn.focusable:focus::before {
+  border-width: 4px;
+  box-shadow: 0 0 25px rgba(229, 9, 20, 0.6), 0 0 50px rgba(229, 9, 20, 0.3),
+    inset 0 0 15px rgba(229, 9, 20, 0.2);
+}
+
+/* TV-specific optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* For TV devices that don't have hover */
+  .movie-item:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+  }
+
+  button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .quality-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .movie-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+  }
+
+  .movie-item {
+    border-radius: 10px;
+  }
+
+  .movie-poster {
+    height: 160px;
+  }
+
+  .movie-detail {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .movie-detail .movie-poster {
+    max-width: 100%;
+    height: 200px;
+    aspect-ratio: 16/9;
+  }
+
+  .movie-list-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .welcome-content h2 {
+    font-size: 28px;
+  }
+
+  .video-container {
+    width: 95%;
+    aspect-ratio: 16/9;
+  }
+
+  .close-player-btn,
+  .fullscreen-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .page-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-list {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .movie-poster {
+    height: 180px;
+  }
+
+  .movie-info {
+    padding: 10px;
+  }
+
+  .movie-info h3 {
+    font-size: 14px;
+  }
+
+  .welcome-content {
+    padding: 20px 15px;
+  }
+
+  .welcome-content h2 {
+    font-size: 24px;
+  }
+
+  .welcome-content p {
+    font-size: 16px;
+  }
+
+  .search-container {
+    max-width: 100%;
+  }
+
+  .search-container input {
+    padding: 15px 20px;
+  }
+
+  .search-container button {
+    padding: 0 20px;
+  }
+
+  .movie-detail .movie-poster {
+    height: 180px;
+  }
+}

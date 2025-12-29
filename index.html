@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DubIndo - Nonton Film Dubbing Indonesia</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <div class="logo">
+          <h1><i class="fas fa-film"></i> DubIndo</h1>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
+        <!-- Welcome Section -->
+        <section id="welcomeSection" class="welcome-section">
+          <div class="welcome-content">
+            <h2>SELAMAT DATANG</h2>
+            <p>Website streaming film dengan dubbing Indonesia terlengkap</p>
+            <div class="search-container">
+              <input
+                type="text"
+                id="welcomeSearchInput"
+                class="focusable"
+                placeholder="Cari judul film..."
+                tabindex="0"
+              />
+              <button id="welcomeSearchButton" class="focusable" tabindex="0">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Movie List Section -->
+        <section
+          id="movieListSection"
+          class="movie-list-section"
+          style="display: none"
+        >
+          <div class="movie-list-container">
+            <div class="movie-list-header">
+              <h2>Hasil Pencarian</h2>
+              <button
+                id="newSearchButton"
+                class="new-search-btn focusable"
+                tabindex="0"
+              >
+                <i class="fas fa-search"></i> Cari Film Lain
+              </button>
+            </div>
+            <div id="movieList" class="movie-list">
+              <!-- Movie items will be added here dynamically -->
+            </div>
+            <!-- Pagination -->
+            <div id="pagination" class="pagination" style="display: none">
+              <button
+                id="prevPage"
+                class="page-btn focusable"
+                tabindex="0"
+                data-disabled="true"
+              >
+                <i class="fas fa-chevron-left"></i> Sebelumnya
+              </button>
+              <div class="page-info">
+                Halaman <span id="currentPage">1</span>
+              </div>
+              <button id="nextPage" class="page-btn focusable" tabindex="0">
+                Selanjutnya <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Movie Detail Section -->
+        <section
+          id="movieDetailSection"
+          class="movie-detail-section"
+          style="display: none"
+        >
+          <button id="backButton" class="back-button focusable" tabindex="0">
+            <i class="fas fa-arrow-left"></i> Kembali
+          </button>
+          <div class="movie-detail">
+            <div class="movie-poster">
+              <img id="moviePoster" src="" alt="Movie Poster" />
+            </div>
+            <div class="movie-info">
+              <h2 id="movieTitle"></h2>
+              <div id="videoQualities" class="video-qualities">
+                <!-- Video quality buttons will be added here dynamically -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Video Player Section -->
+        <section
+          id="videoPlayerSection"
+          class="video-player-section"
+          style="display: none"
+        >
+          <div class="video-controls-container">
+            <button
+              id="closePlayerButton"
+              class="close-player-btn focusable"
+              tabindex="0"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+            <button
+              id="fullscreenButton"
+              class="fullscreen-btn focusable"
+              tabindex="0"
+            >
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+          <div class="video-container">
+            <video id="videoPlayer" controls></video>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2026 DubIndo. All rights reserved.</p>
+        <p>Follow us on Instagram: @_rheex_</p>
+      </div>
+    </footer>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+      <div class="spinner"></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
