@@ -56,13 +56,16 @@ Aplikasi ini mendukung navigasi dengan remote TV:
 ## 📸 Tampilan Aplikasi
 
 ### Halaman Utama
-![Halaman Utama](https://via.placeholder.com/800x450/141414/ffffff?text=Halaman+Utama+DubIndo)
+![Halaman Utama](https://files.catbox.moe/p8qh1a.png)
 
 ### Hasil Pencarian
-![Hasil Pencarian](https://via.placeholder.com/800x450/141414/ffffff?text=Hasil+Pencarian+Film)
+![Hasil Pencarian](https://files.catbox.moe/bt7cpo.png)
+
+### Pemilihan Kualitas
+![Pemilihan Kualitas](https://files.catbox.moe/a1kst6.png)
 
 ### Pemutar Video
-![Pemutar Video](https://via.placeholder.com/800x450/141414/ffffff?text=Pemutar+Video+DubIndo)
+![Pemutar Video](https://files.catbox.moe/e9rccj.png)
 
 ## 🔄 Pembaruan Versi 2.0
 
