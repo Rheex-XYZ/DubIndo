@@ -31,12 +31,6 @@ Platform streaming film dengan dubbing Indonesia terlengkap yang memungkinkan An
 2. Pilih film yang ingin Anda lanjutkan
 3. Video akan dimulai dari posisi terakhir Anda menonton
 
-### Kontrol Pemutaran
-- **Spasi**: Putar/Jeda
-- **←/→**: Mundur/Maju 1 menit
-- **F**: Toggle layar penuh
-- **Esc**: Keluar dari layar penuh/tutup pemutar
-
 ## 🛠️ Teknologi yang Digunakan
 
 - **HTML5** - Struktur halaman
@@ -58,7 +52,6 @@ Aplikasi ini mendukung navigasi dengan remote TV:
 - **Panah Atas/Bawah/Kiri/Kanan**: Navigasi antar elemen
 - **OK/Enter**: Memilih elemen
 - **Back/Escape**: Kembali ke halaman sebelumnya
-- **Channel Up/Down**: Navigasi halaman pada hasil pencarian
 
 ## 📸 Tampilan Aplikasi
 
@@ -84,16 +77,6 @@ Aplikasi ini mendukung navigasi dengan remote TV:
 - Perbaikan masalah navigasi pada grid film
 - Penyimpanan posisi video yang lebih konsisten
 - Perbaikan tampilan pada berbagai ukuran layar
-
-## 🤝 Kontribusi
-
-Kontribusi sangat diterima! Jika Anda ingin berkontribusi pada proyek ini, silakan:
-
-1. Fork proyek ini
-2. Buat branch fitur baru (`git checkout -b fitur/FiturBaru`)
-3. Commit perubahan Anda (`git commit -m 'Menambahkan fitur baru'`)
-4. Push ke branch (`git push origin fitur/FiturBaru`)
-5. Buka Pull Request
 
 ## 📄 Lisensi
 
