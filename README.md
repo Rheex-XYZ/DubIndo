@@ -94,6 +94,3 @@ Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) unt
 
 Jika Anda menyukai proyek ini, berikan bintang ⭐ pada repositori ini!
 © 2026 DubIndo. All rights reserved.
-10. Informasi kontak
-
-Anda bisa menyesuaikan bagian-bagian tertentu sesuai kebutuhan, terutama bagian gambar dan link GitHub yang belum saya isi karena tidak ada informasi tentang repositori GitHub Anda.
