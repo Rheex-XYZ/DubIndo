@@ -3,13 +3,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const welcomeSection = document.getElementById("welcomeSection");
   const movieListSection = document.getElementById("movieListSection");
   const movieDetailSection = document.getElementById("movieDetailSection");
+  const historySection = document.getElementById("historySection");
   const videoPlayerSection = document.getElementById("videoPlayerSection");
   const welcomeSearchInput = document.getElementById("welcomeSearchInput");
   const welcomeSearchButton = document.getElementById("welcomeSearchButton");
   const newSearchButton = document.getElementById("newSearchButton");
+  const historyButton = document.getElementById("historyButton");
+  const backFromHistoryButton = document.getElementById(
+    "backFromHistoryButton"
+  );
   const movieList = document.getElementById("movieList");
+  const historyList = document.getElementById("historyList");
+  const emptyHistory = document.getElementById("emptyHistory");
   const backButton = document.getElementById("backButton");
   const closePlayerButton = document.getElementById("closePlayerButton");
+  const backwardButton = document.getElementById("backwardButton");
+  const playPauseButton = document.getElementById("playPauseButton");
+  const forwardButton = document.getElementById("forwardButton");
   const fullscreenButton = document.getElementById("fullscreenButton");
   const videoPlayer = document.getElementById("videoPlayer");
   const loadingIndicator = document.getElementById("loadingIndicator");
@@ -17,6 +27,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const currentPageSpan = document.getElementById("currentPage");
   const prevPageBtn = document.getElementById("prevPage");
   const nextPageBtn = document.getElementById("nextPage");
+  const currentTimeSpan = document.getElementById("currentTime");
+  const durationSpan = document.getElementById("duration");
+  const progressFill = document.getElementById("progressFill");
+  const progressBar = document.querySelector(".progress-bar");
 
   // State variables
   let currentSearchQuery = "";
@@ -25,6 +39,258 @@ document.addEventListener("DOMContentLoaded", function () {
   let isFullscreen = false;
   let controlsTimeout;
   let isControlsVisible = true;
+  let currentVideo = null;
+  let watchHistory = [];
+  let historyUpdateInterval = null;
+  let isVideoPlaying = false;
+  let videoSource = ""; // Track where video was opened from: 'history' or 'detail'
+
+  // SIMPLE BUT RELIABLE STORAGE SYSTEM
+  const STORAGE_KEY = "dubindo_watch_history_v2";
+
+  // Save data immediately and synchronously
+  function saveData(data) {
+    try {
+      // Save to localStorage (primary)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      // Save to sessionStorage (backup)
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      // Save to cookie (emergency backup)
+      const expires = new Date();
+      expires.setFullYear(expires.getFullYear() + 5); // 5 years
+      document.cookie = `${STORAGE_KEY}=${encodeURIComponent(
+        JSON.stringify(data)
+      )}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+
+      console.log("✅ Data saved successfully:", data);
+      return true;
+    } catch (error) {
+      console.error("❌ Error saving data:", error);
+      return false;
+    }
+  }
+
+  // Load data from all sources
+  function loadData() {
+    let data = null;
+    let source = "";
+
+    try {
+      // Try localStorage first
+      const localStorageData = localStorage.getItem(STORAGE_KEY);
+      if (localStorageData) {
+        data = JSON.parse(localStorageData);
+        source = "localStorage";
+        console.log("✅ Loaded from localStorage:", data);
+      }
+
+      // Try sessionStorage if localStorage is empty
+      if (!data) {
+        const sessionStorageData = sessionStorage.getItem(STORAGE_KEY);
+        if (sessionStorageData) {
+          data = JSON.parse(sessionStorageData);
+          source = "sessionStorage";
+          console.log("✅ Loaded from sessionStorage:", data);
+          // Save back to localStorage
+          saveData(data);
+        }
+      }
+
+      // Try cookie if still empty
+      if (!data) {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split("=");
+          if (name === STORAGE_KEY) {
+            data = JSON.parse(decodeURIComponent(value));
+            source = "cookie";
+            console.log("✅ Loaded from cookie:", data);
+            // Save back to localStorage
+            saveData(data);
+            break;
+          }
+        }
+      }
+
+      if (data) {
+        console.log(`📦 Data loaded from: ${source}`);
+        return data;
+      } else {
+        console.log("📭 No existing data found, starting fresh");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Error loading data:", error);
+      return [];
+    }
+  }
+
+  // Initialize watch history
+  function initWatchHistory() {
+    watchHistory = loadData();
+    updateHistoryUI();
+  }
+
+  // Add or update video in watch history
+  function addToWatchHistory(video) {
+    console.log("🎬 Adding to history:", video);
+
+    // Check if video already exists in history
+    const existingIndex = watchHistory.findIndex(
+      (item) => item.url === video.url
+    );
+
+    if (existingIndex !== -1) {
+      // Update existing entry
+      watchHistory[existingIndex] = video;
+      // Move to the top
+      watchHistory.splice(existingIndex, 1);
+      watchHistory.unshift(video);
+    } else {
+      // Add new entry
+      watchHistory.unshift(video);
+    }
+
+    // Limit history to 20 items
+    if (watchHistory.length > 20) {
+      watchHistory = watchHistory.slice(0, 20);
+    }
+
+    // Save immediately
+    saveData(watchHistory);
+    updateHistoryUI();
+  }
+
+  // Update watch history UI
+  function updateHistoryUI() {
+    if (watchHistory.length === 0) {
+      historyList.style.display = "none";
+      emptyHistory.style.display = "block";
+      return;
+    }
+
+    historyList.style.display = "grid";
+    emptyHistory.style.display = "none";
+    historyList.innerHTML = "";
+
+    watchHistory.forEach((video) => {
+      const historyItem = createHistoryItem(video);
+      historyList.appendChild(historyItem);
+    });
+  }
+
+  // Create history item element
+  function createHistoryItem(video) {
+    const historyItem = document.createElement("div");
+    historyItem.className = "history-item focusable";
+    historyItem.tabIndex = "0";
+
+    // Calculate progress percentage
+    const progressPercentage = video.duration
+      ? (video.currentTime / video.duration) * 100
+      : 0;
+
+    // Format the time display
+    const currentTimeFormatted = formatTime(video.currentTime);
+    const durationFormatted = video.duration
+      ? formatTime(video.duration)
+      : "00:00";
+
+    historyItem.innerHTML = `
+      <div class="movie-poster">
+        <img src="${video.poster}" alt="${video.title}">
+        <div class="history-progress" style="width: ${progressPercentage}%"></div>
+      </div>
+      <div class="history-info">
+        <h3>${video.title}</h3>
+        <p>Terakhir ditonton: ${currentTimeFormatted} / ${durationFormatted}</p>
+      </div>
+    `;
+
+    // Add click event
+    historyItem.addEventListener("click", function () {
+      // Resume from last watched position
+      playVideo(
+        video.url,
+        video.title,
+        video.poster,
+        video.currentTime,
+        "history"
+      );
+    });
+
+    return historyItem;
+  }
+
+  // Format time in minutes:seconds
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  // Save current video position
+  function saveCurrentPosition() {
+    if (currentVideo && isVideoPlaying && videoPlayer.currentTime > 0) {
+      currentVideo.currentTime = videoPlayer.currentTime;
+      currentVideo.duration = videoPlayer.duration;
+      addToWatchHistory(currentVideo);
+      console.log("💾 Position saved:", currentVideo.currentTime);
+    }
+  }
+
+  // NAVIGATION FUNCTIONS - Ensure only one section is visible at a time
+  function showWelcomeSection() {
+    // Hide all sections first
+    hideAllSections();
+    // Show welcome section
+    welcomeSection.style.display = "flex";
+    console.log("🏠 Showing welcome section");
+  }
+
+  function showMovieListSection() {
+    // Hide all sections first
+    hideAllSections();
+    // Show movie list section
+    movieListSection.style.display = "block";
+    console.log("🎬 Showing movie list section");
+  }
+
+  function showMovieDetailSection() {
+    // Hide all sections first
+    hideAllSections();
+    // Show movie detail section
+    movieDetailSection.style.display = "block";
+    console.log("🎥 Showing movie detail section");
+  }
+
+  function showHistorySection() {
+    // Hide all sections first
+    hideAllSections();
+    // Show history section
+    historySection.style.display = "block";
+    console.log("📜 Showing history section");
+  }
+
+  function showVideoPlayerSection() {
+    // Hide all sections first
+    hideAllSections();
+    // Show video player section
+    videoPlayerSection.style.display = "flex";
+    console.log("📺 Showing video player section");
+  }
+
+  function hideAllSections() {
+    welcomeSection.style.display = "none";
+    movieListSection.style.display = "none";
+    movieDetailSection.style.display = "none";
+    historySection.style.display = "none";
+    videoPlayerSection.style.display = "none";
+  }
 
   // Search functionality
   welcomeSearchButton.addEventListener("click", function () {
@@ -41,11 +307,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // New search button
+  // New search button - Go back to welcome section
   newSearchButton.addEventListener("click", function () {
-    welcomeSection.style.display = "block";
-    movieListSection.style.display = "none";
+    showWelcomeSection();
     welcomeSearchInput.focus();
+  });
+
+  // History button
+  historyButton.addEventListener("click", function () {
+    showHistorySection();
+    // Reload history when opening
+    initWatchHistory();
+  });
+
+  // Back from history button - Go back to welcome section
+  backFromHistoryButton.addEventListener("click", function () {
+    showWelcomeSection();
   });
 
   // Pagination buttons with disabled state check
@@ -74,20 +351,72 @@ document.addEventListener("DOMContentLoaded", function () {
     movieListSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // Back button
+  // Back button - Go back to movie list section
   backButton.addEventListener("click", function () {
-    movieDetailSection.style.display = "none";
-    movieListSection.style.display = "block";
+    showMovieListSection();
   });
 
-  // Close player button
+  // Close player button - Smart back navigation based on video source
   closePlayerButton.addEventListener("click", function () {
+    console.log("🔴 Closing player...");
+    saveCurrentPosition();
+
     if (isFullscreen) {
       exitFullscreen();
     }
-    videoPlayerSection.style.display = "none";
     videoPlayer.pause();
-    movieDetailSection.style.display = "block";
+    isVideoPlaying = false;
+
+    // Smart navigation based on where video was opened from
+    if (videoSource === "history") {
+      // If opened from history, go back to history
+      showHistorySection();
+      console.log("📜 Going back to history section");
+    } else {
+      // If opened from detail/quality selection, go back to detail
+      showMovieDetailSection();
+      console.log("🎥 Going back to movie detail section");
+    }
+
+    clearInterval(historyUpdateInterval);
+  });
+
+  // Video control buttons
+  backwardButton.addEventListener("click", function () {
+    if (videoPlayer.currentTime > 60) {
+      videoPlayer.currentTime -= 60;
+    } else {
+      videoPlayer.currentTime = 0;
+    }
+    // Save after seeking
+    setTimeout(saveCurrentPosition, 100);
+  });
+
+  playPauseButton.addEventListener("click", function () {
+    if (videoPlayer.paused) {
+      videoPlayer.play();
+      playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+      isVideoPlaying = true;
+    } else {
+      videoPlayer.pause();
+      playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+      isVideoPlaying = false;
+      // Save when paused
+      saveCurrentPosition();
+    }
+  });
+
+  forwardButton.addEventListener("click", function () {
+    if (
+      videoPlayer.duration &&
+      videoPlayer.currentTime < videoPlayer.duration - 60
+    ) {
+      videoPlayer.currentTime += 60;
+    } else if (videoPlayer.duration) {
+      videoPlayer.currentTime = videoPlayer.duration;
+    }
+    // Save after seeking
+    setTimeout(saveCurrentPosition, 100);
   });
 
   // Fullscreen button
@@ -98,6 +427,185 @@ document.addEventListener("DOMContentLoaded", function () {
       enterFullscreen();
     }
   });
+
+  // Progress bar click to seek
+  progressBar.addEventListener("click", function (e) {
+    const rect = progressBar.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    if (videoPlayer.duration) {
+      videoPlayer.currentTime = pos * videoPlayer.duration;
+      // Save after seeking
+      setTimeout(saveCurrentPosition, 100);
+    }
+  });
+
+  // Video player events
+  videoPlayer.addEventListener("loadedmetadata", function () {
+    durationSpan.textContent = formatTime(videoPlayer.duration);
+
+    // Update current video duration
+    if (currentVideo) {
+      currentVideo.duration = videoPlayer.duration;
+    }
+
+    // Ensure progress container is visible when video loads
+    showControls();
+  });
+
+  videoPlayer.addEventListener("timeupdate", function () {
+    currentTimeSpan.textContent = formatTime(videoPlayer.currentTime);
+    if (videoPlayer.duration) {
+      const progressPercentage =
+        (videoPlayer.currentTime / videoPlayer.duration) * 100;
+      progressFill.style.width = `${progressPercentage}%}`;
+    }
+  });
+
+  videoPlayer.addEventListener("play", function () {
+    playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+    isVideoPlaying = true;
+
+    // Show controls when video starts playing
+    showControls();
+  });
+
+  videoPlayer.addEventListener("pause", function () {
+    playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+    isVideoPlaying = false;
+
+    // Save position when paused
+    saveCurrentPosition();
+
+    // Show controls when video is paused
+    showControls();
+  });
+
+  videoPlayer.addEventListener("ended", function () {
+    playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+    isVideoPlaying = false;
+
+    // Mark as fully watched
+    if (currentVideo) {
+      currentVideo.currentTime = 0; // Reset to beginning for next watch
+      addToWatchHistory(currentVideo);
+    }
+  });
+
+  // Add mouse move event to show controls
+  videoPlayer.addEventListener("mousemove", function () {
+    showControls();
+  });
+
+  // Add click event to video to toggle controls
+  videoPlayer.addEventListener("click", function () {
+    if (isControlsVisible) {
+      hideControlsAfterDelay();
+    } else {
+      showControls();
+    }
+  });
+
+  // CRITICAL: Multiple save triggers for maximum persistence
+  // 1. Save on page visibility change
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      console.log("👁️ Page hidden, saving...");
+      saveCurrentPosition();
+    }
+  });
+
+  // 2. Save on page unload (beforeunload) - MOST IMPORTANT
+  window.addEventListener("beforeunload", function (e) {
+    console.log("🚪 Page unloading, saving...");
+    saveCurrentPosition();
+    // Don't show confirmation dialog
+    e.returnValue = "";
+  });
+
+  // 3. Save on page unload (unload)
+  window.addEventListener("unload", function () {
+    console.log("🚪 Page unloaded, saving...");
+    saveCurrentPosition();
+  });
+
+  // 4. Save on window blur
+  window.addEventListener("blur", function () {
+    console.log("🔲 Window blurred, saving...");
+    saveCurrentPosition();
+  });
+
+  // 5. Save on window focus
+  window.addEventListener("focus", function () {
+    console.log("🔳 Window focused, reloading data...");
+    initWatchHistory();
+  });
+
+  // 6. Save on mouse leave
+  document.addEventListener("mouseleave", function () {
+    console.log("🐭 Mouse left, saving...");
+    saveCurrentPosition();
+  });
+
+  // 7. Save on storage events (sync across tabs)
+  window.addEventListener("storage", function (e) {
+    if (e.key === STORAGE_KEY) {
+      console.log("🔄 Storage changed, reloading...");
+      initWatchHistory();
+    }
+  });
+
+  // 8. Save on online/offline
+  window.addEventListener("online", function () {
+    console.log("🌐 Online, saving...");
+    saveCurrentPosition();
+  });
+
+  window.addEventListener("offline", function () {
+    console.log("📴 Offline, saving...");
+    saveCurrentPosition();
+  });
+
+  // Show controls
+  function showControls() {
+    const controlsContainer = document.querySelector(
+      ".video-controls-container"
+    );
+    const progressContainer = document.querySelector(
+      ".video-progress-container"
+    );
+
+    controlsContainer.style.opacity = "1";
+    progressContainer.classList.remove("hidden");
+    progressContainer.style.opacity = "1";
+    isControlsVisible = true;
+
+    // Clear any existing timeout
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+
+    // If in fullscreen, hide controls after 5 seconds (increased from 3)
+    if (isFullscreen) {
+      hideControlsAfterDelay();
+    }
+  }
+
+  // Hide controls after delay
+  function hideControlsAfterDelay() {
+    controlsTimeout = setTimeout(() => {
+      const controlsContainer = document.querySelector(
+        ".video-controls-container"
+      );
+      const progressContainer = document.querySelector(
+        ".video-progress-container"
+      );
+
+      controlsContainer.style.opacity = "0";
+      progressContainer.classList.add("hidden");
+      progressContainer.style.opacity = "0";
+      isControlsVisible = false;
+    }, 5000); // Increased to 5 seconds
+  }
 
   // Enter fullscreen function
   function enterFullscreen() {
@@ -136,36 +644,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show controls when exiting fullscreen
     showControls();
-  }
-
-  // Show controls
-  function showControls() {
-    const controlsContainer = document.querySelector(
-      ".video-controls-container"
-    );
-    controlsContainer.style.opacity = "1";
-    isControlsVisible = true;
-
-    // Clear any existing timeout
-    if (controlsTimeout) {
-      clearTimeout(controlsTimeout);
-    }
-
-    // If in fullscreen, hide controls after 3 seconds
-    if (isFullscreen) {
-      hideControlsAfterDelay();
-    }
-  }
-
-  // Hide controls after delay
-  function hideControlsAfterDelay() {
-    controlsTimeout = setTimeout(() => {
-      const controlsContainer = document.querySelector(
-        ".video-controls-container"
-      );
-      controlsContainer.style.opacity = "0";
-      isControlsVisible = false;
-    }, 3000);
   }
 
   // Listen for fullscreen change events
@@ -347,8 +825,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updatePagination();
 
     // Show movie list section
-    welcomeSection.style.display = "none";
-    movieListSection.style.display = "block";
+    showMovieListSection();
   }
 
   // Create movie item element
@@ -548,44 +1025,96 @@ document.addEventListener("DOMContentLoaded", function () {
       videoQualities.innerHTML =
         "<p>Tidak ada sumber video yang tersedia untuk film ini.</p>";
     } else {
+      // Check if this video is in watch history
+      const historyVideo = watchHistory.find((video) => video.title === title);
+
       // Create quality buttons
       videoSources.forEach((source) => {
         const button = document.createElement("button");
         button.className = "quality-btn focusable";
         button.tabIndex = "0";
         button.textContent = source.quality;
+
+        // Add resume indicator if video is in history
+        if (historyVideo) {
+          button.innerHTML = `${
+            source.quality
+          } <small>(Lanjut dari ${formatTime(
+            historyVideo.currentTime
+          )})</small>`;
+        }
+
         button.addEventListener("click", function () {
-          playVideo(source.url, title);
+          // Use saved position if available
+          const startTime = historyVideo ? historyVideo.currentTime : 0;
+          playVideo(source.url, title, poster, startTime, "detail");
         });
         videoQualities.appendChild(button);
       });
     }
 
     // Show movie detail section
-    movieListSection.style.display = "none";
-    movieDetailSection.style.display = "block";
+    showMovieDetailSection();
   }
 
-  // Play video
-  function playVideo(url, title) {
+  // Play video - Modified to track video source
+  function playVideo(url, title, poster, startTime = 0, source = "detail") {
+    console.log("🎬 Playing video:", title, "at", startTime, "from:", source);
+
     // Set video source and play
     videoPlayer.src = url;
     videoPlayer.load();
 
     // Show video player section
-    movieDetailSection.style.display = "none";
-    videoPlayerSection.style.display = "flex";
+    showVideoPlayerSection();
 
-    // Focus on fullscreen button for easier navigation
+    // Ensure progress container is visible immediately
     setTimeout(() => {
-      fullscreenButton.focus();
+      showControls();
+    }, 100);
+
+    // Focus on play/pause button for easier navigation
+    setTimeout(() => {
+      playPauseButton.focus();
     }, 500);
 
-    // Play the video
-    videoPlayer.play().catch((error) => {
-      console.error("Error playing video:", error);
-      showError("Tidak dapat memutar video. Silakan coba lagi.");
-    });
+    // Set up current video object
+    currentVideo = {
+      url: url,
+      title: title,
+      poster: poster,
+      currentTime: startTime,
+      duration: 0,
+    };
+
+    // Track where video was opened from
+    videoSource = source;
+
+    // Play video
+    videoPlayer
+      .play()
+      .then(() => {
+        // Seek to start time if specified
+        if (startTime > 0) {
+          videoPlayer.currentTime = startTime;
+        }
+
+        // Update play/pause button
+        playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+        isVideoPlaying = true;
+
+        // Set up interval to update watch history
+        clearInterval(historyUpdateInterval);
+        historyUpdateInterval = setInterval(() => {
+          if (!videoPlayer.paused && !videoPlayer.ended) {
+            saveCurrentPosition();
+          }
+        }, 5000); // Save every 5 seconds
+      })
+      .catch((error) => {
+        console.error("Error playing video:", error);
+        showError("Tidak dapat memutar video. Silakan coba lagi.");
+      });
   }
 
   // Show loading indicator
@@ -653,7 +1182,7 @@ document.addEventListener("DOMContentLoaded", function () {
       this.focusableElements = Array.from(
         document.querySelectorAll(
           "button.focusable, input.focusable, a.focusable, [tabindex].focusable, " +
-            ".movie-item.focusable, .quality-btn.focusable, .page-btn.focusable, .fullscreen-btn.focusable"
+            ".movie-item.focusable, .quality-btn.focusable, .page-btn.focusable, .fullscreen-btn.focusable, .video-control-btn.focusable, .history-item.focusable"
         )
       ).filter((el) => {
         // Only include visible elements
@@ -674,9 +1203,11 @@ document.addEventListener("DOMContentLoaded", function () {
       this.gridRows = {};
       this.gridCols = {};
 
-      // Get all movie items
+      // Get all movie items and history items
       const movieItems = Array.from(
-        document.querySelectorAll(".movie-item.focusable")
+        document.querySelectorAll(
+          ".movie-item.focusable, .history-item.focusable"
+        )
       );
 
       // Calculate grid layout based on actual positions
@@ -791,7 +1322,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     findNextMovieElement(direction) {
-      if (!this.currentElement.classList.contains("movie-item")) {
+      if (
+        !this.currentElement.classList.contains("movie-item") &&
+        !this.currentElement.classList.contains("history-item")
+      ) {
         // If not on a movie, use regular navigation
         return this.findNextElement(direction);
       }
@@ -891,7 +1425,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const focusableElements = Array.from(
         document.querySelectorAll(
           "button.focusable, input.focusable, a.focusable, [tabindex].focusable, " +
-            ".movie-item.focusable, .quality-btn.focusable, .page-btn.focusable, .fullscreen-btn.focusable"
+            ".movie-item.focusable, .quality-btn.focusable, .page-btn.focusable, .fullscreen-btn.focusable, .video-control-btn.focusable, .history-item.focusable"
         )
       ).filter((el) => {
         // Only include visible elements
@@ -1039,11 +1573,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Initialize enhanced spatial navigation when DOM is loaded
+  // Initialize everything when DOM is loaded
   document.addEventListener("DOMContentLoaded", function () {
+    console.log("🚀 DOM loaded, initializing...");
+
     // Add focusable class to interactive elements
     const interactiveElements = document.querySelectorAll(
-      "button, input, a, [tabindex], .movie-item, .quality-btn, .page-btn, .fullscreen-btn"
+      "button, input, a, [tabindex], .movie-item, .quality-btn, .page-btn, .fullscreen-btn, .video-control-btn, .history-item"
     );
 
     interactiveElements.forEach((el) => {
@@ -1054,6 +1590,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize enhanced spatial navigation
     window.spatialNav = new SpatialNavigation();
+
+    // Initialize watch history
+    initWatchHistory();
+
+    // Auto-save every 10 seconds as backup
+    setInterval(() => {
+      if (currentVideo && isVideoPlaying) {
+        saveCurrentPosition();
+      }
+    }, 10000);
 
     // Enhanced keyboard navigation
     document.addEventListener("keydown", function (e) {
@@ -1088,6 +1634,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // Back button on remote
       if (e.key === "Back" || e.key === "Escape") {
         if (videoPlayerSection.style.display === "flex") {
+          // Save current position before closing
+          saveCurrentPosition();
+
           if (isFullscreen) {
             exitFullscreen();
           }
@@ -1096,6 +1645,8 @@ document.addEventListener("DOMContentLoaded", function () {
           backButton.click();
         } else if (movieListSection.style.display === "block") {
           newSearchButton.click();
+        } else if (historySection.style.display === "block") {
+          backFromHistoryButton.click();
         }
       }
 
@@ -1128,8 +1679,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      // Show controls when any key is pressed in fullscreen mode
-      if (isFullscreen && videoPlayerSection.style.display === "flex") {
+      // Space key for play/pause
+      if (e.key === " " && videoPlayerSection.style.display === "flex") {
+        e.preventDefault();
+        playPauseButton.click();
+        // Show controls when space is pressed
+        showControls();
+      }
+
+      // Left/Right arrow keys for seek when video is playing
+      if (
+        videoPlayerSection.style.display === "flex" &&
+        !e.repeat &&
+        (e.key === "ArrowLeft" || e.key === "ArrowRight")
+      ) {
+        if (e.key === "ArrowLeft") {
+          backwardButton.click();
+        } else {
+          forwardButton.click();
+        }
+        // Show controls when arrow keys are used
+        showControls();
+      }
+
+      // Show controls when any key is pressed in video player
+      if (videoPlayerSection.style.display === "flex") {
         showControls();
       }
     });

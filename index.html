@@ -17,6 +17,11 @@
         <div class="logo">
           <h1><i class="fas fa-film"></i> DubIndo</h1>
         </div>
+        <nav class="nav-menu">
+          <button id="historyButton" class="nav-button focusable" tabindex="0">
+            <i class="fas fa-history"></i> Riwayat Tontonan
+          </button>
+        </nav>
       </div>
     </header>
 
@@ -105,6 +110,33 @@
           </div>
         </section>
 
+        <!-- Watch History Section -->
+        <section
+          id="historySection"
+          class="history-section"
+          style="display: none"
+        >
+          <div class="history-container">
+            <div class="history-header">
+              <h2>Riwayat Tontonan</h2>
+              <button
+                id="backFromHistoryButton"
+                class="back-button focusable"
+                tabindex="0"
+              >
+                <i class="fas fa-arrow-left"></i> Kembali
+              </button>
+            </div>
+            <div id="historyList" class="history-list">
+              <!-- History items will be added here dynamically -->
+            </div>
+            <div id="emptyHistory" class="empty-history" style="display: none">
+              <i class="fas fa-film"></i>
+              <p>Belum ada riwayat tontonan</p>
+            </div>
+          </div>
+        </section>
+
         <!-- Video Player Section -->
         <section
           id="videoPlayerSection"
@@ -120,6 +152,30 @@
               <i class="fas fa-times"></i>
             </button>
             <button
+              id="backwardButton"
+              class="video-control-btn focusable"
+              tabindex="0"
+              title="Mundur 1 menit"
+            >
+              <i class="fas fa-backward"></i>
+            </button>
+            <button
+              id="playPauseButton"
+              class="video-control-btn focusable"
+              tabindex="0"
+              title="Putar/Jeda"
+            >
+              <i class="fas fa-play"></i>
+            </button>
+            <button
+              id="forwardButton"
+              class="video-control-btn focusable"
+              tabindex="0"
+              title="Maju 1 menit"
+            >
+              <i class="fas fa-forward"></i>
+            </button>
+            <button
               id="fullscreenButton"
               class="fullscreen-btn focusable"
               tabindex="0"
@@ -129,6 +185,15 @@
           </div>
           <div class="video-container">
             <video id="videoPlayer" controls></video>
+          </div>
+          <div class="video-progress-container">
+            <div class="video-time">
+              <span id="currentTime">00:00</span> /
+              <span id="duration">00:00</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
           </div>
         </section>
       </div>
